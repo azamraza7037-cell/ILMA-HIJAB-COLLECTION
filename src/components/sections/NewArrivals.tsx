@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useRef, useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -11,29 +11,7 @@ export default function NewArrivals() {
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
-  const [items, setItems] = useState<Product[]>([]);
-
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const res = await fetch('/api/products');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setItems(data);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Could not fetch products from API, falling back to local data', err);
-      }
-      setItems(initialProducts);
-    };
-
-    loadProducts();
-  }, []);
-
-  const allProducts = items.length > 0 ? items : initialProducts;
+  const allProducts = initialProducts;
   const newArrivals = allProducts.filter(p => p.isNewArrival || p.badge === 'NEW_ARRIVAL');
 
   const checkScroll = () => {
@@ -132,3 +110,5 @@ export default function NewArrivals() {
     </section>
   );
 }
+
+

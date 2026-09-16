@@ -1,4 +1,4 @@
-'use client';
+﻿'use client';
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
@@ -8,8 +8,7 @@ import { products as initialProducts } from '@/data/products';
 import { Product } from '@/types';
 
 export default function SpecialOffers() {
-  const [items, setItems] = useState<Product[]>([]);
-  const [timeLeft, setTimeLeft] = useState({
+const [timeLeft, setTimeLeft] = useState({
     days: 3,
     hours: 12,
     minutes: 45,
@@ -17,26 +16,7 @@ export default function SpecialOffers() {
   });
 
   useEffect(() => {
-    // Fetch live products from database
-    const loadProducts = async () => {
-      try {
-        const res = await fetch('/api/products');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setItems(data);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Could not fetch products from API, falling back to local data', err);
-      }
-      setItems(initialProducts);
-    };
-
-    loadProducts();
-
-    const timer = setInterval(() => {
+const timer = setInterval(() => {
       setTimeLeft(prev => {
         if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 };
         if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 };
@@ -49,7 +29,7 @@ export default function SpecialOffers() {
     return () => clearInterval(timer);
   }, []);
 
-  const offerProducts = (items.length > 0 ? items : initialProducts).filter(
+  const offerProducts = initialProducts.filter(
     p => p.badge === 'SPECIAL_OFFER' || p.badge === 'LIMITED_TIME'
   ).slice(0, 3);
 
@@ -157,3 +137,5 @@ export default function SpecialOffers() {
     </section>
   );
 }
+
+

@@ -1,6 +1,6 @@
-'use client';
+﻿'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductCard from '@/components/product/ProductCard';
 import { products as initialProducts } from '@/data/products';
@@ -18,29 +18,7 @@ const categories: { label: string; value: FilterCategory }[] = [
 
 export default function FeaturedCollection() {
   const [activeTab, setActiveTab] = useState<FilterCategory>('ALL');
-  const [items, setItems] = useState<Product[]>([]);
-
-  useEffect(() => {
-    const loadProducts = async () => {
-      try {
-        const res = await fetch('/api/products');
-        if (res.ok) {
-          const data = await res.json();
-          if (Array.isArray(data) && data.length > 0) {
-            setItems(data);
-            return;
-          }
-        }
-      } catch (err) {
-        console.warn('Could not fetch products from API, falling back to local data', err);
-      }
-      setItems(initialProducts);
-    };
-
-    loadProducts();
-  }, []);
-
-  const allProducts = items.length > 0 ? items : initialProducts;
+  const allProducts = initialProducts;
   const filteredProducts = activeTab === 'ALL' 
     ? allProducts.slice(0, 8) 
     : allProducts.filter(p => p.category === activeTab).slice(0, 8);
@@ -103,18 +81,12 @@ export default function FeaturedCollection() {
             >
               {filteredProducts.length === 0 ? (
                 <div className="col-span-full text-center py-16 text-gray-400">
-                  <p className="mb-4 text-sm">Products are temporarily unavailable.</p>
-                  <button 
-                    onClick={() => {
-                      fetch('/api/products')
-                        .then(r => r.json())
-                        .then(d => { if (Array.isArray(d)) setItems(d); })
-                        .catch(() => setItems(initialProducts));
-                    }}
-                    className="px-6 py-2 border border-[#C9A96E] text-[#C9A96E] text-xs font-semibold uppercase tracking-wider rounded hover:bg-[#C9A96E] hover:text-black transition"
-                  >
-                    Retry
-                  </button>
+                  <p className="mb-4 text-sm">Products are temporarily unavailable.</p>                   <button
+                     onClick={() => window.location.reload()}
+                     className="px-6 py-2 border border-[#C9A96E] text-[#C9A96E] text-xs font-semibold uppercase tracking-wider rounded hover:bg-[#C9A96E] hover:text-black transition"
+                   >
+                     Retry
+                   </button>
                 </div>
               ) : (
                 filteredProducts.map(product => (
@@ -139,3 +111,5 @@ export default function FeaturedCollection() {
     </section>
   );
 }
+
+

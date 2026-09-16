@@ -4,7 +4,8 @@ import NewArrivals from "@/components/sections/NewArrivals";
 import SpecialOffers from "@/components/sections/SpecialOffers";
 import TrustSection from "@/components/sections/TrustSection";
 import BrandStory from "@/components/sections/BrandStory";
-import WhatsAppButton from "@/components/ui/WhatsAppButton";
+import WhatsAppButton from '@/components/ui/WhatsAppButton';
+import AIStylist from '@/components/ui/AIStylist';
 
 export default function Home() {
   return (
@@ -21,6 +22,8 @@ export default function Home() {
       <BrandStory />
 
       <WhatsAppButton />
+        <AIStylist />
     </main>
   );
 }
+

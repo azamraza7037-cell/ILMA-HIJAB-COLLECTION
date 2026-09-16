@@ -1,5 +1,6 @@
 // @ts-nocheck
 import prisma from '@/lib/prisma';
+import { products as localProducts } from '@/data/products';
 
 export interface RecommendedProduct {
   id: string;
@@ -28,30 +29,86 @@ export async function processCustomerMessage(
 ): Promise<ChatResponse> {
   const query = userMessage.trim().toLowerCase();
 
-  // 1. Fetch live products from DB
-  const liveProducts = await prisma.product.findMany({
-    where: { status: 'ACTIVE' },
-    select: {
-      id: true,
-      name: true,
-      slug: true,
-      description: true,
-      shortDescription: true,
-      category: true,
-      images: true,
-      originalPrice: true,
-      salePrice: true,
-      stock: true,
-      badge: true,
-      fabricInfo: true,
-    },
-  });
+  // 1. Fetch live products from DB when available.
+  //    Fall back to the verified local 18-product catalog when DB/env is unavailable.
+  let liveProducts: any[] = [];
+
+  try {
+    liveProducts = await prisma.product.findMany({
+      where: { status: 'ACTIVE' },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        description: true,
+        shortDescription: true,
+        category: true,
+        images: true,
+        originalPrice: true,
+        salePrice: true,
+        stock: true,
+        badge: true,
+        fabricInfo: true,
+      },
+    });
+  } catch {
+    liveProducts = localProducts.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      description: p.description || p.shortDescription || '',
+      shortDescription: p.shortDescription || p.description || '',
+      category: p.category,
+      images: Array.isArray(p.images)
+        ? JSON.stringify(p.images)
+        : JSON.stringify([p.image || '/placeholder.jpg']),
+      originalPrice: Number(p.originalPrice ?? p.price ?? 0),
+      salePrice:
+        p.salePrice !== undefined && p.salePrice !== null
+          ? Number(p.salePrice)
+          : null,
+      stock: Number(p.stock ?? 0),
+      badge: p.badge || 'NONE',
+      fabricInfo: p.fabricInfo || '',
+    }));
+  }
+
+  // A DB can be reachable but empty. Never leave the stylist with an empty
+  // catalog while the verified local catalog is available.
+  if (!liveProducts.length) {
+    liveProducts = localProducts.map((p: any) => ({
+      id: p.id,
+      name: p.name,
+      slug: p.slug,
+      description: p.description || p.shortDescription || '',
+      shortDescription: p.shortDescription || p.description || '',
+      category: p.category,
+      images: Array.isArray(p.images)
+        ? JSON.stringify(p.images)
+        : JSON.stringify([p.image || '/placeholder.jpg']),
+      originalPrice: Number(p.originalPrice ?? p.price ?? 0),
+      salePrice:
+        p.salePrice !== undefined && p.salePrice !== null
+          ? Number(p.salePrice)
+          : null,
+      stock: Number(p.stock ?? 0),
+      badge: p.badge || 'NONE',
+      fabricInfo: p.fabricInfo || '',
+    }));
+  }
 
   const parsedProducts: RecommendedProduct[] = liveProducts.map((p) => {
     let img = '/placeholder.jpg';
+
     try {
-      const arr = JSON.parse(p.images);
-      if (Array.isArray(arr) && arr.length > 0) img = arr[0];
+      const arr =
+        typeof p.images === 'string'
+          ? JSON.parse(p.images)
+          : p.images;
+
+      if (Array.isArray(arr) && arr.length > 0) {
+        img = arr[0];
+      }
     } catch {}
 
     return {
@@ -80,19 +137,29 @@ export async function processCustomerMessage(
       };
     }
 
-    const order = await prisma.order.findFirst({
-      where: {
-        orderId: matchedOrderId,
-        customerPhone: phoneMatch[0],
-      },
-      select: {
-        orderId: true,
-        status: true,
-        paymentStatus: true,
-        totalAmount: true,
-        createdAt: true,
-      },
-    });
+    let order: any = null;
+
+    try {
+      order = await prisma.order.findFirst({
+        where: {
+          orderId: matchedOrderId,
+          customerPhone: phoneMatch[0],
+        },
+        select: {
+          orderId: true,
+          status: true,
+          paymentStatus: true,
+          totalAmount: true,
+          createdAt: true,
+        },
+      });
+    } catch {
+      return {
+        reply:
+          `I can't access live order tracking right now. Your order information is kept secure. ` +
+          `Please try the Order Tracking page again in a moment or contact our WhatsApp support at +91 9286558531.`,
+      };
+    }
 
     if (order) {
       return {
