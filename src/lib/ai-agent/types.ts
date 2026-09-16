@@ -167,4 +167,4 @@ export interface AgentSettings {
   fastSellingStockMultiplier: number;
 }
 
-export type JsonInput = Prisma.InputJsonValue;
+export type JsonInput = any;

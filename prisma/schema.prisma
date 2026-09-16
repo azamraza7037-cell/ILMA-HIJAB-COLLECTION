@@ -1,4 +1,4 @@
-﻿generator client {
+generator client {
   provider = "prisma-client-js"
 }
 
@@ -7,23 +7,271 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum OrderStatus {
-  PENDING
-  CONFIRMED
-  REJECTED
+model Order {
+  id                String      @id @default(cuid())
+  orderId           String      @unique
+  customerName      String
+  customerEmail     String
+  customerPhone     String
+  customerWhatsapp  String?
+  addressLine1      String
+  addressLine2      String?
+  city              String
+  state             String
+  postalCode        String
+  country           String      @default("India")
+  subtotal          Float
+  shippingFee       Float
+  tax               Float
+  totalAmount       Float
+  status            String      @default("PENDING")
+  paymentStatus     String      @default("PENDING")
+  paymentMethod     String?
+  razorpayOrderId   String?
+  razorpayPaymentId String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt @default(now())
+  customerId        String?
+  discount          Float       @default(0.0)
+  Customer          Customer?   @relation(fields: [customerId], references: [id])
+  items             OrderItem[]
 }
 
-model Order {
-  id            String      @id @default(cuid())
-  customerName  String
-  phone         String
-  address       String
-  city          String
-  productName   String
-  quantity      Int         @default(1)
-  amount        Float
-  status        OrderStatus @default(PENDING)
-  adminNote     String?
-  createdAt     DateTime    @default(now())
-  updatedAt     DateTime    @updatedAt
+model AbandonedCart {
+  id              String    @id @default(cuid())
+  cartToken       String    @unique
+  customerId      String?
+  customerPhone   String?
+  customerEmail   String?
+  items           String
+  cartValue       Float     @default(0.0)
+  status          String    @default("ACTIVE")
+  recoveryStatus  String    @default("NOT_CONTACTED")
+  lastActiveAt    DateTime  @default(now())
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt @default(now())
+  contactCount    Int       @default(0)
+  lastContactedAt DateTime?
+  Customer        Customer? @relation(fields: [customerId], references: [id])
+}
+
+model Admin {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt @default(now())
+}
+
+model AdminNotification {
+  id        String   @id @default(cuid())
+  type      String
+  title     String
+  message   String
+  link      String?
+  isRead    Boolean  @default(false)
+  metadata  String?
+  createdAt DateTime @default(now())
+}
+
+model AgentExecution {
+  id           String    @id @default(cuid())
+  executionKey String    @unique
+  trigger      String
+  status       String    @default("RUNNING")
+  context      Json?
+  plan         Json?
+  result       Json?
+  reasoning    String?
+  model        String?
+  error        String?
+  verified     Boolean   @default(false)
+  durationMs   Int?
+  createdAt    DateTime  @default(now())
+  finishedAt   DateTime?
+}
+
+model AgentMemory {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  category  String
+  value     String
+  metadata  Json?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model AgentTask {
+  id               String    @id @default(cuid())
+  taskKey          String    @unique
+  type             String
+  title            String
+  description      String?
+  priority         String    @default("MEDIUM")
+  status           String    @default("PENDING")
+  requiresApproval Boolean   @default(false)
+  payload          Json?
+  result           Json?
+  error            String?
+  relatedType      String?
+  relatedId        String?
+  executionId      String?
+  createdAt        DateTime  @default(now())
+  updatedAt        DateTime  @updatedAt @default(now())
+  completedAt      DateTime?
+}
+
+model AiReport {
+  id                String   @id @default(cuid())
+  reportType        String
+  periodStart       DateTime
+  periodEnd         DateTime
+  totalVisitors     Int      @default(0)
+  totalOrders       Int      @default(0)
+  totalRevenue      Float    @default(0.0)
+  conversionRate    Float    @default(0.0)
+  topProducts       String?
+  lowStockProducts  String?
+  customerInsights  String?
+  aiRecommendations String?
+  createdAt         DateTime @default(now())
+}
+
+model AnalyticsEvent {
+  id             String          @id @default(cuid())
+  sessionId      String?
+  eventType      String
+  pageUrl        String?
+  productId      String?
+  orderId        String?
+  metadata       String?
+  createdAt      DateTime        @default(now())
+  VisitorSession VisitorSession? @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+}
+
+model AutomationRule {
+  id          String   @id @default(cuid())
+  key         String   @unique
+  name        String
+  description String?
+  trigger     String
+  enabled     Boolean  @default(true)
+  config      Json?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt @default(now())
+}
+
+model Customer {
+  id            String          @id @default(cuid())
+  name          String
+  email         String?
+  phone         String          @unique
+  whatsapp      String?
+  totalOrders   Int             @default(0)
+  totalSpent    Float           @default(0.0)
+  lastOrderAt   DateTime?
+  customerType  String          @default("NEW")
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt @default(now())
+  AbandonedCart AbandonedCart[]
+  Order         Order[]
+}
+
+model InventoryLog {
+  id            String   @id @default(cuid())
+  productId     String
+  previousStock Int
+  change        Int
+  newStock      Int
+  eventType     String
+  referenceId   String?
+  note          String?
+  createdAt     DateTime @default(now())
+  Product       Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  productId String
+  name      String
+  price     Float
+  quantity  Int
+  color     String?
+  size      String?
+  Order     Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  Product   Product @relation(fields: [productId], references: [id])
+}
+
+model Product {
+  id               String         @id @default(cuid())
+  name             String
+  slug             String         @unique
+  description      String
+  shortDescription String?
+  category         String
+  images           String
+  colors           String
+  sizes            String
+  originalPrice    Float
+  salePrice        Float?
+  badge            String         @default("NONE")
+  rating           Float          @default(0.0)
+  reviewCount      Int            @default(0)
+  stock            Int            @default(0)
+  isFeatured       Boolean        @default(false)
+  isNewArrival     Boolean        @default(false)
+  isBestSeller     Boolean        @default(false)
+  fabricInfo       String?
+  careInstructions String?
+  createdAt        DateTime       @default(now())
+  updatedAt        DateTime       @updatedAt @default(now())
+  sku              String?
+  status           String         @default("ACTIVE")
+  InventoryLog     InventoryLog[]
+  OrderItem        OrderItem[]
+}
+
+model PushSubscription {
+  id        String   @id @default(cuid())
+  endpoint  String   @unique
+  p256dh    String
+  auth      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt @default(now())
+}
+
+model VisitorSession {
+  id             String           @id @default(cuid())
+  sessionId      String           @unique
+  visitorId      String
+  ipHash         String?
+  userAgent      String?
+  referrer       String?
+  firstPage      String?
+  lastPage       String?
+  pageViews      Int              @default(1)
+  isActive       Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  lastActiveAt   DateTime         @default(now())
+  AnalyticsEvent AnalyticsEvent[]
+}
+
+model WebhookEvent {
+  id          String    @id @default(cuid())
+  provider    String
+  eventId     String
+  eventType   String
+  payloadHash String
+  status      String    @default("RECEIVED")
+  payload     Json?
+  receivedAt  DateTime  @default(now())
+  processedAt DateTime?
+  error       String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt @default(now())
+
+  @@unique([provider, eventId])
+  @@index([provider, status])
 }

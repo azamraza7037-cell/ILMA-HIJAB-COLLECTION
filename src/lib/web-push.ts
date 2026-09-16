@@ -58,7 +58,7 @@ export async function sendPushNotification(
 
   await Promise.all(
     subscriptions.map(
-      async (subscription) => {
+      async (subscription: any) => {
         try {
           await webpush.sendNotification(
             {

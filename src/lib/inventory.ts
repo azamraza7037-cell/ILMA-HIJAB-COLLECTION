@@ -164,7 +164,7 @@ export async function adjustProductStock(
   note?: string,
   referenceId?: string
 ) {
-  return await prisma.$transaction(async (tx) => {
+  return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
     const product = await tx.product.findUnique({
       where: { id: productId },
       select: { id: true, name: true, stock: true },

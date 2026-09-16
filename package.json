@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint"
   },
@@ -21,7 +21,8 @@
     "three": "0.186.0",
     "zustand": "^4.4.7",
     "clsx": "^2.0.0",
-    "tailwind-merge": "^2.0.0"
+    "tailwind-merge": "^2.0.0",
+    "next-auth": "^4.24.15"
   },
   "devDependencies": {
     "@types/node": "^20",

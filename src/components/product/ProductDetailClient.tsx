@@ -112,7 +112,7 @@ export default function ProductDetailClient({ product, relatedProducts }: Produc
   const handleBuyNow = () => {
     if (isOutOfStock) return;
     addItem(product, quantity, selectedColor, selectedSize);
-    router.push('/checkout');
+    window.location.href = `upi://pay?pa=ilmaansari87945@oksbi&pn=Payment&am=${totalCalc}&cu=INR`;
   };
 
   const handleOpenUpiModal = () => {

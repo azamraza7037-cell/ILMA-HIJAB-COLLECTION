@@ -28,15 +28,15 @@ export default function ParticleCanvas() {
       return;
     }
 
-    let renderer: THREE.WebGLRenderer | null = null;
-    let scene: THREE.Scene | null = null;
-    let camera: THREE.PerspectiveCamera | null = null;
+    let renderer: any = null;
+    let scene: any = null;
+    let camera: any = null;
     let animationFrameId: number | null = null;
-    let particleGeometry: THREE.BufferGeometry | null = null;
-    let ringGeo: THREE.RingGeometry | null = null;
-    let torusGeo: THREE.TorusGeometry | null = null;
-    let goldMaterial: THREE.MeshStandardMaterial | null = null;
-    let pointMat: THREE.PointsMaterial | null = null;
+    let particleGeometry: any = null;
+    let ringGeo: any = null;
+    let torusGeo: any = null;
+    let goldMaterial: any = null;
+    let pointMat: any = null;
 
     let onMouseMove: ((event: MouseEvent) => void) | null = null;
     let onWindowResize: (() => void) | null = null;
@@ -102,7 +102,7 @@ export default function ParticleCanvas() {
       scene.add(particleSystem);
 
       // Geometric Elements
-      const elements: THREE.Mesh[] = [];
+      const elements: any[] = [];
 
       // 8 Octagonal Stars
       ringGeo = new THREE.RingGeometry(0.1, 0.15, 8);

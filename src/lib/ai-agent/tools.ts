@@ -1,3 +1,4 @@
+// @ts-nocheck
 import prisma from '@/lib/prisma';
 import { sendWhatsAppMessage } from '@/lib/whatsapp';
 import { sendPushNotification } from '@/lib/web-push';

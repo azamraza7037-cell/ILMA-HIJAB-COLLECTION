@@ -1,6 +1,6 @@
 'use client';
 
-import { motion, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion, type Variants } from 'framer-motion';
 import dynamic from 'next/dynamic';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
@@ -14,7 +14,7 @@ const ParticleCanvas = dynamic(() => import('./ParticleCanvas'), {
 export default function HeroSection() {
   const shouldReduceMotion = useReducedMotion();
 
-  const containerVariants = {
+  const containerVariants: Variants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -25,9 +25,9 @@ export default function HeroSection() {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: Variants = {
     hidden: { opacity: 0, y: shouldReduceMotion ? 0 : 20 },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: [0.16, 1, 0.3, 1] } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.8, ease: "easeOut" } },
   };
 
   const headingText = "Modesty, Reimagined.";
@@ -81,7 +81,7 @@ export default function HeroSection() {
                         y: 0,
                         transition: { 
                           duration: 0.8, 
-                          ease: [0.2, 0.65, 0.3, 0.9] 
+                          ease: "easeOut" as const
                         } 
                       }
                     }}

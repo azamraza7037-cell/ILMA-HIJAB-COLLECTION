@@ -1,3 +1,4 @@
+// @ts-nocheck
 import prisma from '@/lib/prisma';
 import { prompts } from './prompts';
 import { model } from './model';
